@@ -1,0 +1,18 @@
+{
+  "EL-1001": {
+    "Nome": "Arduino Nano v3",
+    "Descrizione": "Arduino Nano v3 clone",
+    "Componenti che lo compongono": [],
+    "Componenti che lo usano": [],
+    "Tipologia di Componente": "Elettronica",
+    "Link al componente per il download": null
+  },
+  "EL-0001": {
+    "Nome": "XT60 - M",
+    "Descrizione": "Connettore di potenza, batteria, maschio.",
+    "Componenti che lo compongono": [],
+    "Componenti che lo usano": [],
+    "Tipologia di Componente": "Elettronica",
+    "Link al componente per il download": null
+  }
+}

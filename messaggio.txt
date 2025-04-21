@@ -1,0 +1,16 @@
+INFO sui codici
+Ogni codice è costituito di 3 parti separate da un - senza spazi
+La prima parte identifica il reparto, la seconda il componente specifico, la terza la versione
+   
+Prima parte: 2 o 3 lettere.
+   Le prime due lettere identificano il tipo di componente, l'eventuale terza lettera identifica casi di uso particolari come test bench o jig
+
+Seconda parte: sono 4 cifre.
+   prima cifra          : 0 compoente totalmente fatto da noi
+                        : 1 componente assembleto pronto all'uso
+   seconda cifra        : identifica il livello di assieme (1 è costituito da soli elementi 0 o 1, 2 è costituito di soli elementi 0,1 o 2)
+   terza e quarta cifra : numeri sequenziali da usare (da 01 a 99)
+
+Terza parte: sono 2 cifre.
+   Numeri sequenziali da usare (da 00 a 99)
+   NB: 00 solo se componenti non fatti da noi
