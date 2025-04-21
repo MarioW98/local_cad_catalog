@@ -10,12 +10,12 @@ from database import *
 class GestoreComponentiGUI:
     def __init__(self, master):
         self.master = master
-        master.title("Gestore Componenti")
+        master.title("Componenti")
         self.database = load_database()
 
         self.crea_interfaccia_principale()
     def apri_file_info(self):
-        """Apre il file messaggio.txt con l'applicazione predefinita."""
+        
         file_path = "messaggio.txt" # Assicurati che questo percorso sia corretto
         try:
             if sys.platform == "win32":
@@ -29,13 +29,8 @@ class GestoreComponentiGUI:
         except Exception as e:
             messagebox.showerror("Errore", f"Impossibile aprire il file: {e}")
 
-    def mostra_info(self, titolo, messaggio):
-        """Mostra una finestra informativa con titolo e messaggio."""
-        # Questo metodo rimane, potrebbe servire altrove
-        messagebox.showinfo(titolo, messaggio)
-
     def crea_interfaccia_principale(self):
-        """Crea l'interfaccia principale con i bottoni per le azioni."""
+        
         btn_aggiungi = ttk.Button(self.master, text="Aggiungi Componente", command=self.apri_finestra_aggiungi)
         btn_aggiungi.pack(pady=10)
 
@@ -46,7 +41,7 @@ class GestoreComponentiGUI:
         btn_elenca.pack(pady=10)
 
     def apri_finestra_aggiungi(self):
-        """Apre una finestra per aggiungere un nuovo componente."""
+        #nuovo componente
         aggiungi_finestra = tk.Toplevel(self.master)
         aggiungi_finestra.title("Aggiungi Nuovo Componente")
 
@@ -62,15 +57,14 @@ class GestoreComponentiGUI:
         self.text_descrizione_aggiungi = tk.Text(aggiungi_finestra, height=3, width=30)
         self.text_descrizione_aggiungi.grid(row=2, column=1, padx=5, pady=5)
 
-        # --- Modifica per Tipologia ---
         tk.Label(aggiungi_finestra, text="Tipologia:").grid(row=3, column=0, padx=5, pady=5)
-        # Estrai le tipologie uniche esistenti dal database
+
         tipologie_esistenti = sorted(list(set(dettagli.get("Tipologia di Componente", "")
                                              for dettagli in self.database.values()
                                              if dettagli.get("Tipologia di Componente")))) # Filtra valori vuoti/None
         self.combo_tipologia_aggiungi = ttk.Combobox(aggiungi_finestra, values=tipologie_esistenti)
         self.combo_tipologia_aggiungi.grid(row=3, column=1, padx=5, pady=5, sticky="ew") # sticky="ew" per allargare
-        # --- Fine Modifica ---
+
 
         tk.Label(aggiungi_finestra, text="Link (opzionale):").grid(row=4, column=0, padx=5, pady=5)
         self.entry_link_aggiungi = ttk.Entry(aggiungi_finestra)
@@ -80,9 +74,9 @@ class GestoreComponentiGUI:
         btn_salva.grid(row=5, column=0, columnspan=2, pady=10)
 
     def salva_nuovo_componente(self):
-        """Salva un nuovo componente nel database."""
+        #salvataggio nuovo componente 
         codice = self.entry_codice_aggiungi.get().strip().upper()
-        if not codice: # Aggiunto controllo per codice vuoto
+        if not codice: # il codice non può essere vuoto
              messagebox.showerror("Errore", "Il codice non può essere vuoto.")
              return
         if codice in self.database:
@@ -91,12 +85,10 @@ class GestoreComponentiGUI:
 
         nome = self.entry_nome_aggiungi.get().strip()
         descrizione = self.text_descrizione_aggiungi.get("1.0", tk.END).strip()
-        # --- Modifica per leggere dal Combobox ---
         tipologia = self.combo_tipologia_aggiungi.get().strip()
-        # --- Fine Modifica ---
         link = self.entry_link_aggiungi.get().strip() or None
 
-        # Aggiunto controllo per campi obbligatori (es. Nome, Tipologia) se necessario
+        # campi obbligatori
         if not nome:
             messagebox.showerror("Errore", "Il nome non può essere vuoto.")
             return
@@ -117,14 +109,14 @@ class GestoreComponentiGUI:
         self.entry_codice_aggiungi.delete(0, tk.END)
         self.entry_nome_aggiungi.delete(0, tk.END)
         self.text_descrizione_aggiungi.delete("1.0", tk.END)
-        # --- Modifica per pulire il Combobox ---
+
         self.combo_tipologia_aggiungi.set('') # Pulisce il valore selezionato/inserito
-        # Aggiorna anche i valori del combobox nel caso sia stata inserita una nuova tipologia
+
         tipologie_esistenti = sorted(list(set(dettagli.get("Tipologia di Componente", "")
                                              for dettagli in self.database.values()
                                              if dettagli.get("Tipologia di Componente"))))
         self.combo_tipologia_aggiungi['values'] = tipologie_esistenti
-        # --- Fine Modifica ---
+
         self.entry_link_aggiungi.delete(0, tk.END)
 
     def apri_finestra_visualizza(self):
@@ -165,7 +157,7 @@ class GestoreComponentiGUI:
             messagebox.showinfo("Attenzione", "Seleziona un componente dalla tabella per vederne i dettagli.")
             return
 
-        codice = selected_iid # L'iid corrisponde al codice del componente
+        codice = selected_iid
         if codice in self.database:
             componente = self.database[codice]
             dettagli_str = f"Dettagli Componente - Codice: {codice}\n\n"
@@ -193,20 +185,16 @@ class GestoreComponentiGUI:
         elenca_finestra.title("Elenco Componenti")
         elenca_finestra.geometry("600x400")
 
-        # Frame per il Treeview
         tree_frame = ttk.Frame(elenca_finestra)
         tree_frame.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
         
-        # Scrollbar per il Treeview
         scrollbar = ttk.Scrollbar(tree_frame)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        # Crea il Treeview
         columns = ("Codice", "Nome", "Tipologia")
         self.tree_componenti = ttk.Treeview(tree_frame, columns=columns, show='headings', yscrollcommand=scrollbar.set)
         scrollbar.config(command=self.tree_componenti.yview)
 
-        # Definisci gli header
         self.tree_componenti.heading("Codice", text="Codice")
         self.tree_componenti.heading("Nome", text="Nome")
         self.tree_componenti.heading("Tipologia", text="Tipologia")
@@ -214,12 +202,9 @@ class GestoreComponentiGUI:
         self.tree_componenti.column("Nome", width=250, anchor=tk.W)
         self.tree_componenti.column("Tipologia", width=150, anchor=tk.W)
 
-        # Popola il Treeview con i dati
         if self.database:
-            # Svuota prima di ripopolare (se la finestra può essere riaperta)
             for i in self.tree_componenti.get_children():
                 self.tree_componenti.delete(i)
-            # Popola
             for codice, dettagli in sorted(self.database.items()): # Ordina per codice
                 nome = dettagli.get('Nome', 'N/A')
                 tipologia = dettagli.get('Tipologia di Componente', 'N/A')
@@ -229,7 +214,6 @@ class GestoreComponentiGUI:
 
         self.tree_componenti.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        # Frame per i bottoni in basso
         button_frame = ttk.Frame(elenca_finestra)
         button_frame.pack(pady=10, fill=tk.X, padx=10)
 
@@ -239,10 +223,10 @@ class GestoreComponentiGUI:
         btn_mostra_dettagli = ttk.Button(button_frame, text="Mostra Dettagli", command=self.mostra_dettagli_da_lista)
         btn_mostra_dettagli.pack(side=tk.LEFT, padx=5)
 
-        # --- Modifica Bottone Info ---
-        # Ora chiama il nuovo metodo per aprire il file
+        btn_modifica_selezionato = ttk.Button(button_frame, text="Modifica Selezionato", command=self.apri_finestra_modifica)
+        btn_modifica_selezionato.pack(side=tk.LEFT, padx=5)
+
         btn_info = ttk.Button(button_frame, text="Info", command=self.apri_file_info)
-        # --- Fine Modifica ---
         btn_info.pack(side=tk.LEFT, padx=5)
 
 
@@ -282,6 +266,122 @@ class GestoreComponentiGUI:
                     self.tree_componenti.delete(selected_item) # Rimuovi comunque dalla vista
         else:
             messagebox.showinfo("Attenzione", "Seleziona un componente dalla tabella per rimuoverlo.")
+
+    def apri_finestra_modifica(self):
+        """Apre una finestra per modificare il componente selezionato."""
+        selected_iid = self.tree_componenti.focus()
+        if not selected_iid:
+            messagebox.showinfo("Attenzione", "Seleziona un componente dalla tabella per modificarlo.")
+            return
+
+        codice = selected_iid
+        if codice not in self.database:
+            messagebox.showerror("Errore", f"Componente con codice '{codice}' non trovato. Potrebbe essere stato rimosso.")
+            # Rimuovi dalla vista se non esiste più
+            try:
+                self.tree_componenti.delete(selected_iid)
+            except tk.TclError:
+                pass
+            return
+
+        componente = self.database[codice]
+
+        # Crea la finestra di modifica (simile a quella di aggiunta)
+        modifica_finestra = tk.Toplevel(self.master)
+        modifica_finestra.title(f"Modifica Componente - {codice}")
+
+        # Campi (Codice è read-only)
+        tk.Label(modifica_finestra, text="Codice:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
+        tk.Label(modifica_finestra, text=codice).grid(row=0, column=1, padx=5, pady=5, sticky="w") # Mostra codice come label
+
+        tk.Label(modifica_finestra, text="Nome:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
+        entry_nome_modifica = ttk.Entry(modifica_finestra, width=30)
+        entry_nome_modifica.grid(row=1, column=1, padx=5, pady=5)
+        entry_nome_modifica.insert(0, componente.get("Nome", ""))
+
+        tk.Label(modifica_finestra, text="Descrizione:").grid(row=2, column=0, padx=5, pady=5, sticky="nw") # sticky nw per allineare label in alto
+        text_descrizione_modifica = tk.Text(modifica_finestra, height=3, width=30)
+        text_descrizione_modifica.grid(row=2, column=1, padx=5, pady=5)
+        text_descrizione_modifica.insert("1.0", componente.get("Descrizione", ""))
+
+        tk.Label(modifica_finestra, text="Tipologia:").grid(row=3, column=0, padx=5, pady=5, sticky="w")
+        tipologie_esistenti = sorted(list(set(dettagli.get("Tipologia di Componente", "")
+                                             for dettagli in self.database.values()
+                                             if dettagli.get("Tipologia di Componente"))))
+        combo_tipologia_modifica = ttk.Combobox(modifica_finestra, values=tipologie_esistenti, width=28)
+        combo_tipologia_modifica.grid(row=3, column=1, padx=5, pady=5, sticky="ew")
+        combo_tipologia_modifica.set(componente.get("Tipologia di Componente", ""))
+
+        tk.Label(modifica_finestra, text="Link:").grid(row=4, column=0, padx=5, pady=5, sticky="w")
+        entry_link_modifica = ttk.Entry(modifica_finestra, width=30)
+        entry_link_modifica.grid(row=4, column=1, padx=5, pady=5)
+        entry_link_modifica.insert(0, componente.get("Link al componente per il download", "") or "") # Gestisce None
+
+        # Bottone Salva Modifiche
+        # Passiamo i widget e il codice alla funzione salva
+        btn_salva_modifiche = ttk.Button(modifica_finestra, text="Salva Modifiche",
+                                         command=lambda: self.salva_modifiche_componente(
+                                             codice,
+                                             entry_nome_modifica,
+                                             text_descrizione_modifica,
+                                             combo_tipologia_modifica,
+                                             entry_link_modifica,
+                                             modifica_finestra # Passa la finestra per chiuderla
+                                         ))
+        btn_salva_modifiche.grid(row=5, column=0, columnspan=2, pady=10)
+
+    # --- Fine Modifica ---
+        self.combo_tipologia_aggiungi.set('') # Pulisce il valore selezionato/inserito
+
+        tipologie_esistenti = sorted(list(set(dettagli.get("Tipologia di Componente", "")
+                                             for dettagli in self.database.values()
+                                             if dettagli.get("Tipologia di Componente"))))
+        self.combo_tipologia_aggiungi['values'] = tipologie_esistenti
+        # --- Fine Modifica ---
+        self.entry_link_aggiungi.delete(0, tk.END)
+
+    def salva_modifiche_componente(self, codice, entry_nome, text_descrizione, combo_tipologia, entry_link, finestra):
+        """Salva le modifiche apportate a un componente."""
+        nome = entry_nome.get().strip()
+        descrizione = text_descrizione.get("1.0", tk.END).strip()
+        tipologia = combo_tipologia.get().strip()
+        link = entry_link.get().strip() or None
+
+        # Validazione campi obbligatori
+        if not nome:
+            messagebox.showerror("Errore", "Il nome non può essere vuoto.", parent=finestra) # parent per mostrare sopra la finestra modale
+            return
+        if not tipologia:
+             messagebox.showerror("Errore", "La tipologia non può essere vuota.", parent=finestra)
+             return
+
+        # Aggiorna il database
+        if codice in self.database:
+            self.database[codice]["Nome"] = nome
+            self.database[codice]["Descrizione"] = descrizione
+            self.database[codice]["Tipologia di Componente"] = tipologia
+            self.database[codice]["Link al componente per il download"] = link
+            save_database(self.database)
+
+            # Aggiorna la riga nel Treeview nella finestra Elenca
+            self.tree_componenti.item(codice, values=(codice, nome, tipologia))
+
+            # Aggiorna le tipologie disponibili nel Combobox Aggiungi (se aperto o alla prossima apertura)
+            tipologie_esistenti_aggiornate = sorted(list(set(dettagli.get("Tipologia di Componente", "")
+                                                          for dettagli in self.database.values()
+                                                          if dettagli.get("Tipologia di Componente"))))
+            # Se la finestra aggiungi è stata creata, aggiorna il suo combobox
+            if hasattr(self, 'combo_tipologia_aggiungi') and self.combo_tipologia_aggiungi.winfo_exists():
+                 self.combo_tipologia_aggiungi['values'] = tipologie_esistenti_aggiornate
+            # Aggiorna anche il combobox della finestra di modifica stessa (se si vuole aggiungere un'altra tipologia e salvare di nuovo)
+            if combo_tipologia.winfo_exists():
+                 combo_tipologia['values'] = tipologie_esistenti_aggiornate
+
+
+            messagebox.showinfo("Successo", f"Componente '{nome}' (Codice: {codice}) aggiornato.", parent=finestra)
+            finestra.destroy() # Chiude la finestra di modifica
+        else:
+             messagebox.showerror("Errore", f"Errore durante il salvataggio: Componente con codice '{codice}' non trovato.", parent=finestra)
 
 if __name__ == "__main__":
     root = tk.Tk()
